@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { Plane, ArrowLeftRight, Calendar, MapPin } from "lucide-react";
+import DatePicker from "react-datepicker";
+import { Plane, ArrowLeftRight, Calendar, MapPin, Users } from "lucide-react";
 
 type TripType = "round" | "oneWay";
 
@@ -15,14 +16,31 @@ const airports: Airport[] = [
   { code: "LHR", city: "London" },
 ];
 
+type CabinClass = "Economy" | "Business" | "First";
+
 export default function FlightSearch() {
   const [tripType, setTripType] = useState<TripType>("round");
+  const [travellersOpen, setTravellersOpen] = useState(false);
+
+  const [adults, setAdults] = useState(1);
+  const [children, setChildren] = useState(0);
+  const [infants, setInfants] = useState(0);
+
+  const [cabinClass, setCabinClass] = useState<CabinClass>("Economy");
 
   const [from, setFrom] = useState("");
   const [to, setTo] = useState("");
 
-  const [departure, setDeparture] = useState("");
-  const [returnDate, setReturnDate] = useState("");
+  const [departureDate, setDepartureDate] = useState<Date | null>(null);
+  const [returnDate, setReturnDate] = useState<Date | null>(null);
+
+  const handleTripTypeChange = (type: TripType) => {
+    setTripType(type);
+
+    if (type === "oneWay") {
+      setReturnDate(null); // VERY IMPORTANT
+    }
+  };
 
   const handleSwap = () => {
     if (!from || !to) return;
@@ -32,8 +50,15 @@ export default function FlightSearch() {
     setTo(temp);
   };
 
+  const handleDateChange = (dates: [Date | null, Date | null]) => {
+    const [start, end] = dates;
+
+    setDepartureDate(start);
+    setReturnDate(end);
+  };
+
   const handleSearch = () => {
-    if (!from || !to || !departure) {
+    if (!from || !to || !departureDate) {
       alert("Please select From, To and Departure date");
       return;
     }
@@ -43,36 +68,124 @@ export default function FlightSearch() {
       return;
     }
 
-    console.log({ tripType, from, to, departure, returnDate });
+    console.log({
+      tripType,
+      from,
+      to,
+      departureDate,
+      returnDate,
+    });
   };
+
+  const CounterRow = ({
+    label,
+    value,
+    setValue,
+  }: {
+    label: string;
+    value: number;
+    setValue: (n: number) => void;
+  }) => (
+    <div className="flex justify-between items-center py-2">
+      <span className="text-sm">{label}</span>
+
+      <div className="flex items-center gap-2">
+        <button
+          onClick={() => setValue(Math.max(0, value - 1))}
+          className="w-6 h-6 border rounded"
+        >
+          –
+        </button>
+
+        <span className="w-4 text-center">{value}</span>
+
+        <button
+          onClick={() => setValue(value + 1)}
+          className="w-6 h-6 border rounded"
+        >
+          +
+        </button>
+      </div>
+    </div>
+  );
 
   return (
     <div className="bg-white rounded-2xl shadow-sm p-4 sm:p-6">
-      {/* Trip Type */}
-      <div className="flex flex-wrap gap-2 mb-4 justify-center sm:justify-start">
-        <button
-          onClick={() => setTripType("round")}
-          className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm transition ${
-            tripType === "round"
-              ? "bg-blue-600 text-white"
-              : "bg-gray-100 text-gray-700"
-          }`}
-        >
-          <Plane size={16} />
-          Round Trip
-        </button>
+      {/* top */}
+      <div className="flex justify-between items-center mb-4">
+        <div className="flex flex-wrap gap-2 mb-4 justify-center sm:justify-start">
+          <button
+            onClick={() => handleTripTypeChange("round")}
+            className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm ${
+              tripType === "round"
+                ? "bg-blue-600 text-white"
+                : "bg-gray-100 text-gray-700 border border-gray-400"
+            }`}
+          >
+            <Plane size={16} />
+            Round Trip
+          </button>
 
-        <button
-          onClick={() => setTripType("oneWay")}
-          className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm transition ${
-            tripType === "oneWay"
-              ? "bg-blue-600 text-white"
-              : "bg-gray-100 text-gray-700"
-          }`}
-        >
-          <ArrowLeftRight size={16} />
-          One Way
-        </button>
+          <button
+            onClick={() => handleTripTypeChange("oneWay")}
+            className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm ${
+              tripType === "oneWay"
+                ? "bg-blue-600 text-white"
+                : "bg-gray-100 text-gray-700 border border-gray-400"
+            }`}
+          >
+            <ArrowLeftRight size={16} />
+            One Way
+          </button>
+        </div>
+        <div className="flex gap-2">
+          {/* passenger */}
+          <div className="relative">
+            <button
+              onClick={() => setTravellersOpen((prev) => !prev)}
+              className="border rounded-lg px-3 h-10 text-sm bg-blue-100 flex items-center gap-1"
+            >
+              <Users size={16} className="text-blue-600" />
+              <span>{adults + children + infants}</span>
+              {adults + children + infants === 1 ? "Traveller" : "Travellers"}
+            </button>
+            {travellersOpen && (
+              <div className="absolute right-0 mt-2 w-64 bg-white border rounded-xl shadow-lg p-4 z-50">
+                <CounterRow
+                  label="Adults"
+                  value={adults}
+                  setValue={setAdults}
+                />
+                <CounterRow
+                  label="Children"
+                  value={children}
+                  setValue={setChildren}
+                />
+                <CounterRow
+                  label="Infants"
+                  value={infants}
+                  setValue={setInfants}
+                />
+
+                <button
+                  onClick={() => setTravellersOpen(false)}
+                  className="mt-3 w-full bg-blue-600 text-white py-2 rounded-lg text-sm"
+                >
+                  Done
+                </button>
+              </div>
+            )}
+          </div>
+          {/* class */}
+          <select
+            value={cabinClass}
+            onChange={(e) => setCabinClass(e.target.value as CabinClass)}
+            className="border rounded-lg px-3 h-10 text-sm bg-blue-100"
+          >
+            <option value="Economy">Economy</option>
+            <option value="Business">Business</option>
+          </select>
+        </div>
       </div>
 
       {/* Form */}
@@ -95,10 +208,7 @@ export default function FlightSearch() {
         </div>
 
         {/* Swap */}
-        <button
-          onClick={handleSwap}
-          className="h-10 px-3 border rounded-lg flex items-center justify-center"
-        >
+        <button onClick={handleSwap} className="h-10 px-3 border rounded-lg">
           <ArrowLeftRight size={16} />
         </button>
 
@@ -119,29 +229,29 @@ export default function FlightSearch() {
           </select>
         </div>
 
-        {/* Departure */}
+        {/* Date Picker */}
         <div className="flex items-center border rounded-lg px-2 flex-1 h-10">
           <Calendar size={16} className="text-gray-400 mr-2" />
-          <input
-            type="date"
-            value={departure}
-            onChange={(e) => setDeparture(e.target.value)}
-            className="w-full outline-none text-sm"
-          />
-        </div>
 
-        {/* Return */}
-        {tripType === "round" && (
-          <div className="flex items-center border rounded-lg px-2 flex-1 h-10">
-            <Calendar size={16} className="text-gray-400 mr-2" />
-            <input
-              type="date"
-              value={returnDate}
-              onChange={(e) => setReturnDate(e.target.value)}
+          {tripType === "round" ? (
+            <DatePicker
+              selected={departureDate}
+              onChange={handleDateChange}
+              startDate={departureDate}
+              endDate={returnDate}
+              selectsRange
+              placeholderText="Select travel dates"
               className="w-full outline-none text-sm"
             />
-          </div>
-        )}
+          ) : (
+            <DatePicker
+              selected={departureDate}
+              onChange={(date: Date | null) => setDepartureDate(date)}
+              placeholderText="Select departure date"
+              className="w-full outline-none text-sm"
+            />
+          )}
+        </div>
       </div>
 
       {/* Button */}
