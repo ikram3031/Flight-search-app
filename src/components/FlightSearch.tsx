@@ -1,6 +1,7 @@
 import { useState } from "react";
 import DatePicker from "react-datepicker";
 import { Plane, ArrowLeftRight, Calendar, MapPin, Users } from "lucide-react";
+import { toast } from "sonner";
 
 type TripType = "round" | "oneWay";
 
@@ -59,12 +60,14 @@ export default function FlightSearch() {
 
   const handleSearch = () => {
     if (!from || !to || !departureDate) {
-      alert("Please select From, To and Departure date");
+      // alert("Please select From, To and Departure date");
+      toast.error("Please select From, To and travel date(s)");
       return;
     }
 
     if (tripType === "round" && !returnDate) {
-      alert("Please select Return date");
+      // alert("Please select Return date");
+      toast.error("Please select Return date");
       return;
     }
 
