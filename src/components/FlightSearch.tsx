@@ -29,17 +29,35 @@ export default function FlightSearch() {
 
   const [cabinClass, setCabinClass] = useState<CabinClass>("Economy");
 
-  const [from, setFrom] = useState("");
-  const [to, setTo] = useState("");
+  const [from, setFrom] = useState("DAC");
+  const [to, setTo] = useState("DXB");
 
-  const [departureDate, setDepartureDate] = useState<Date | null>(null);
-  const [returnDate, setReturnDate] = useState<Date | null>(null);
+  const today = new Date();
+
+  const defaultDeparture = new Date(today);
+  defaultDeparture.setDate(today.getDate() + 1);
+
+  const defaultReturn = new Date(today);
+  defaultReturn.setDate(today.getDate() + 5);
+
+  const [departureDate, setDepartureDate] = useState<Date | null>(
+    defaultDeparture,
+  );
+  const [returnDate, setReturnDate] = useState<Date | null>(defaultReturn);
 
   const handleTripTypeChange = (type: TripType) => {
     setTripType(type);
 
     if (type === "oneWay") {
-      setReturnDate(null); // VERY IMPORTANT
+      setReturnDate(null);
+    }
+
+    // Switching back to Round Trip
+    if (type === "round" && !returnDate && departureDate) {
+      const newReturn = new Date(departureDate);
+      newReturn.setDate(departureDate.getDate() + 4);
+
+      setReturnDate(newReturn);
     }
   };
 
@@ -59,17 +77,22 @@ export default function FlightSearch() {
   };
 
   const handleSearch = () => {
-    if (!from || !to || !departureDate) {
-      // alert("Please select From, To and Departure date");
-      toast.error("Please select From, To and travel date(s)");
+    if (!from || !to) {
+      toast.error("Please select origin and destination");
+      return;
+    }
+
+    if (!departureDate) {
+      toast.error("Please select departure date");
       return;
     }
 
     if (tripType === "round" && !returnDate) {
-      // alert("Please select Return date");
-      toast.error("Please select Return date");
+      toast.error("Please select return date");
       return;
     }
+
+    toast.success("Searching flights...");
 
     console.log({
       tripType,
@@ -201,7 +224,7 @@ export default function FlightSearch() {
             onChange={(e) => setFrom(e.target.value)}
             className="w-full outline-none text-sm bg-transparent h-10"
           >
-            <option value="">From</option>
+            {/* <option value="">From</option> */}
             {airports.map((a) => (
               <option key={a.code} value={a.code}>
                 {a.city} ({a.code})
@@ -226,7 +249,7 @@ export default function FlightSearch() {
             onChange={(e) => setTo(e.target.value)}
             className="w-full outline-none text-sm bg-transparent h-10"
           >
-            <option value="">To</option>
+            {/* <option value="">To</option> */}
             {airports.map((a) => (
               <option key={a.code} value={a.code}>
                 {a.city} ({a.code})
