@@ -2,6 +2,7 @@ import { useState } from "react";
 import DatePicker from "react-datepicker";
 import { Plane, ArrowLeftRight, Calendar, MapPin, Users } from "lucide-react";
 import { toast } from "sonner";
+import type { SearchPayload } from "../utils/types";
 
 type TripType = "round" | "oneWay";
 
@@ -19,7 +20,11 @@ const airports: Airport[] = [
 
 type CabinClass = "Economy" | "Business" | "First";
 
-export default function FlightSearch() {
+type Props = {
+  onSearch: (payload: SearchPayload) => void;
+};
+
+export default function FlightSearch({ onSearch }: Props) {
   const [tripType, setTripType] = useState<TripType>("round");
   const [travellersOpen, setTravellersOpen] = useState(false);
 
@@ -38,7 +43,7 @@ export default function FlightSearch() {
   defaultDeparture.setDate(today.getDate() + 1);
 
   const defaultReturn = new Date(today);
-  defaultReturn.setDate(today.getDate() + 5);
+  defaultReturn.setDate(today.getDate() + 3);
 
   const [departureDate, setDepartureDate] = useState<Date | null>(
     defaultDeparture,
@@ -55,7 +60,7 @@ export default function FlightSearch() {
     // Switching back to Round Trip
     if (type === "round" && !returnDate && departureDate) {
       const newReturn = new Date(departureDate);
-      newReturn.setDate(departureDate.getDate() + 4);
+      newReturn.setDate(departureDate.getDate() + 3);
 
       setReturnDate(newReturn);
     }
@@ -91,9 +96,6 @@ export default function FlightSearch() {
       toast.error("Please select return date");
       return;
     }
-
-    toast.success("Searching flights...");
-
     console.log({
       tripType,
       from,
@@ -101,6 +103,22 @@ export default function FlightSearch() {
       departureDate,
       returnDate,
     });
+
+    const payload: SearchPayload = {
+      tripType,
+      from,
+      to,
+      departureDate,
+      returnDate,
+      passengers: {
+        adults,
+        children,
+        infants,
+      },
+      cabinClass,
+    };
+
+    onSearch(payload);
   };
 
   const CounterRow = ({

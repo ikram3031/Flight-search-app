@@ -1,8 +1,11 @@
+import type { SearchPayload } from "../utils/types";
 import FlightSearch from "./FlightSearch";
 
-type Props = {};
+type Props = {
+  onSearch: (payload: SearchPayload) => void;
+};
 
-const Home = (props: Props) => {
+const Home = ({ onSearch }: Props) => {
   return (
     <section className="bg-linear-to-b from-blue-100 to-white py-16 sm:py-20 min-h-screen">
       <div className="max-w-5xl mx-auto px-4 sm:px-6 text-center">
@@ -16,7 +19,7 @@ const Home = (props: Props) => {
         </p>
 
         <div className="mt-8 sm:mt-12">
-          <FlightSearch />
+          <FlightSearch onSearch={onSearch} />
         </div>
       </div>
     </section>
