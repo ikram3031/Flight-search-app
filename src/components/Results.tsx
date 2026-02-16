@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Pencil } from "lucide-react";
 import type { SearchPayload } from "../utils/types";
 import { format } from "date-fns";
@@ -102,14 +102,32 @@ const Results = ({ searchParams, onBack }: Props) => {
             },
           ];
 
+    let passengers = [];
+
+    if (searchParams.passengers.adults > 0) {
+      passengers.push({
+        PassengerType: "ADT",
+        Quantity: searchParams.passengers.adults,
+      });
+    }
+
+    if (searchParams.passengers.children > 0) {
+      passengers.push({
+        PassengerType: "CHD",
+        Quantity: searchParams.passengers.children,
+      });
+    }
+
+    if (searchParams.passengers.infants > 0) {
+      passengers.push({
+        PassengerType: "INF",
+        Quantity: searchParams.passengers.infants,
+      });
+    }
+
     return {
       OriginDestinationOptions: segments,
-      Passengers: [
-        {
-          PassengerType: "ADT",
-          Quantity: searchParams.passengers.adults,
-        },
-      ],
+      Passengers: passengers,
       CabinClass: searchParams.cabinClass,
       ApiId: apiId,
     };
@@ -245,7 +263,7 @@ const Results = ({ searchParams, onBack }: Props) => {
     searchParams.passengers.children +
     searchParams.passengers.infants;
 
-  const loadMore = () => {
+  const loadMore = useCallback(() => {
     const nextPage = page + 1;
 
     const nextItems = flights.slice(page * CHUNK_SIZE, nextPage * CHUNK_SIZE);
@@ -254,7 +272,7 @@ const Results = ({ searchParams, onBack }: Props) => {
 
     setDisplayedFlights((prev) => [...prev, ...nextItems]);
     setPage(nextPage);
-  };
+  }, [page, flights]);
 
   useEffect(() => {
     if (!observerRef.current) return;
@@ -274,7 +292,10 @@ const Results = ({ searchParams, onBack }: Props) => {
     observer.observe(observerRef.current);
 
     return () => observer.disconnect();
-  }, [displayedFlights, flights, page]);
+  }, [displayedFlights, flights, loadMore]);
+
+  console.log("Displayed:", displayedFlights);
+  console.log("laoding", loading);
 
   return (
     <div className="bg-blue-100 min-h-screen ">
@@ -312,12 +333,21 @@ const Results = ({ searchParams, onBack }: Props) => {
           </button>
         </div>
       </div>
-      {/* Loadning */}
+
+      {/* Loading */}
       {loading && (
-        <div className="p-6 text-center text-gray-500">
-          Searching flights...
+        <div className="w-full h-[60vh] flex items-center justify-center">
+          <span className="text-2xl font-semibold text-gray-800 animate-pulse">
+            Searching flights...
+          </span>
         </div>
       )}
+      {!loading && displayedFlights.length === 0 && (
+        <div className="p-6 my-auto text-center text-gray-800">
+          <span className="text-xl font-semibold">No flights found</span>
+        </div>
+      )}
+
       {/* Results */}
       {!loading && displayedFlights.length > 0 && (
         <div className="max-w-4xl mx-auto p-4 space-y-4">
@@ -410,7 +440,7 @@ const Results = ({ searchParams, onBack }: Props) => {
                 </div>
 
                 {/* RIGHT */}
-                <div className="flex flex-row sm:flex-col justify-between sm:justify-center gap-6 items-center border-t border-gray-300 pt-4 sm:border-0 sm:pt-0">
+                <div className="flex flex-row sm:flex-col justify-between sm:justify-center gap-2 items-center border-t border-gray-300 pt-4 sm:border-0 sm:pt-0">
                   <p className="text-sm font-bold text-center text-gray-800">
                     {flight.currency}{" "}
                     <span className="text-xl">{flight.price}</span>
