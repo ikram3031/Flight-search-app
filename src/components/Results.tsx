@@ -381,6 +381,9 @@ const Results = ({ searchParams, onBack }: Props) => {
                       <p className="text-xs truncate">
                         {format(flight.outbound.depDate, "d MMM, EEEE")}
                       </p>
+                      <p className="text-xs text-gray-500 font-bold mt-1">
+                        {flight.outbound.from}
+                      </p>
                     </div>
 
                     <div>
@@ -389,6 +392,9 @@ const Results = ({ searchParams, onBack }: Props) => {
                       </p>
                       <p className="text-xs truncate">
                         {format(flight.outbound.arrDate, "d MMM, EEEE")}
+                      </p>
+                      <p className="text-xs text-gray-500 font-bold mt-1">
+                        {flight.outbound.to}
                       </p>
                     </div>
 
@@ -419,6 +425,9 @@ const Results = ({ searchParams, onBack }: Props) => {
                         <p className="text-xs truncate">
                           {format(flight.inbound.depDate, "d MMM, EEEE")}
                         </p>
+                        <p className="text-xs text-gray-500 font-bold mt-1">
+                          {flight.inbound.from}
+                        </p>
                       </div>
 
                       <div>
@@ -428,12 +437,15 @@ const Results = ({ searchParams, onBack }: Props) => {
                         <p className="text-xs truncate">
                           {format(flight.inbound.arrDate, "d MMM, EEEE")}
                         </p>
+                        <p className="text-xs text-gray-500 font-bold mt-1">
+                          {flight.inbound.to}
+                        </p>
                       </div>
 
                       <div className="text-sm font-bold">
                         {flight.inStops === 0
                           ? "Non-Stop"
-                          : `${flight.inStops} Stop`}
+                          : `${flight.inStops} Stop(s)`}
                       </div>
                     </div>
                   )}
