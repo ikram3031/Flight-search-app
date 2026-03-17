@@ -1,9 +1,13 @@
-import React from "react";
+import HeroSection from "../components/home/HereSection";
 
 type Props = {};
 
 const HomePage = (props: Props) => {
-  return <div>HomePage</div>;
+  return (
+    <div>
+      <HeroSection />
+    </div>
+  );
 };
 
 export default HomePage;
