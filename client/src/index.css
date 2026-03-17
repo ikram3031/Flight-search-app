@@ -3,3 +3,9 @@
 button {
   cursor: pointer;
 }
+
+@theme {
+  --color-brand-dark: #145a66;
+  --color-brand-accent: #42595e;
+  --color-brand-light: #43c3d8;
+}
