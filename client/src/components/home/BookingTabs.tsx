@@ -11,7 +11,7 @@ const BookingTabs = () => {
 
   return (
     <div className="w-full rounded-2xl ">
-      <div className="flex items-center gap-2 border-b px-4 pt-4">
+      <div className="flex items-center justify-center gap-2 border-b px-4 pt-4">
         <button
           type="button"
           onClick={() => setActiveTab("flight")}
