@@ -15,9 +15,9 @@ const navItems: NavItem[] = [
 const Header = () => {
   return (
     <header className="w-full border-t-[6px] border-[#3f4654] bg-white shadow-sm">
-      <div className="mx-auto flex h-[80px] max-w-[1240px] items-center justify-between px-4">
+      <div className="mx-auto flex h-20 max-w-290 items-center justify-between xl:px-0 px-4">
         <div className="flex items-center justify-between gap-12">
-          <a href="/" className="flex items-center gap-2">
+          <a href="/">
             {/* Logo */}
             <img
               src={logo}

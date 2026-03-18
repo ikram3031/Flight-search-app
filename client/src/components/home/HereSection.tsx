@@ -25,7 +25,7 @@ const HeroSection = () => {
         </h1>
 
         {/* Search Box */}
-        <div className="w-full max-w-5xl bg-white rounded-2xl shadow-xl p-6">
+        <div className="w-full max-w-290 bg-white rounded-2xl shadow-xl p-6">
           <BookingTabs />
         </div>
       </div>

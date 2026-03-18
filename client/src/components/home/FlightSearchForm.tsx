@@ -1,5 +1,4 @@
-import { useMemo, useState } from "react";
-import DatePicker from "react-datepicker";
+import { useMemo, useState, type Dispatch, type SetStateAction } from "react";
 import {
   ArrowLeftRight,
   ChevronDown,
@@ -9,7 +8,7 @@ import {
   Users,
 } from "lucide-react";
 import { toast } from "sonner";
-// import type { SearchPayload } from "../utils/types";
+import FlightDatePicker from "../ui/FlightDatePicker";
 
 type TripType = "round" | "oneWay";
 
@@ -34,9 +33,46 @@ const airports: Airport[] = [
   { code: "CXB", city: "Cox's Bazar" },
 ];
 
+type CounterRowProps = {
+  label: string;
+  value: number;
+  setValue: Dispatch<SetStateAction<number>>;
+  min?: number;
+};
+
+const CounterRow = ({ label, value, setValue, min = 0 }: CounterRowProps) => {
+  return (
+    <div className="flex items-center justify-between py-2">
+      <span className="text-sm font-medium text-slate-700">{label}</span>
+
+      <div className="flex items-center gap-3">
+        <button
+          type="button"
+          onClick={() => setValue((prev) => Math.max(min, prev - 1))}
+          className="flex h-8 w-8 items-center justify-center rounded-md border border-slate-300 text-slate-700 transition hover:bg-slate-50"
+        >
+          -
+        </button>
+
+        <span className="w-5 text-center text-sm font-semibold text-slate-800">
+          {value}
+        </span>
+
+        <button
+          type="button"
+          onClick={() => setValue((prev) => prev + 1)}
+          className="flex h-8 w-8 items-center justify-center rounded-md border border-slate-300 text-slate-700 transition hover:bg-slate-50"
+        >
+          +
+        </button>
+      </div>
+    </div>
+  );
+};
+
 const FlightSearchForm = () => {
   const [tripType, setTripType] = useState<TripType>("round");
-  const [travellersOpen, setTravellersOpen] = useState(false);
+  const [travellersOpen, setTravellersOpen] = useState<boolean>(false);
 
   const [adults, setAdults] = useState<number>(1);
   const [children, setChildren] = useState<number>(0);
@@ -48,13 +84,23 @@ const FlightSearchForm = () => {
   const [from, setFrom] = useState<string>("DAC");
   const [to, setTo] = useState<string>("CXB");
 
-  const today = new Date();
+  const today = useMemo(() => {
+    const date = new Date();
+    date.setHours(0, 0, 0, 0);
+    return date;
+  }, []);
 
-  const defaultDeparture = new Date(today);
-  defaultDeparture.setDate(today.getDate() + 1);
+  const defaultDeparture = useMemo(() => {
+    const date = new Date(today);
+    date.setDate(today.getDate() + 1);
+    return date;
+  }, [today]);
 
-  const defaultReturn = new Date(today);
-  defaultReturn.setDate(today.getDate() + 3);
+  const defaultReturn = useMemo(() => {
+    const date = new Date(today);
+    date.setDate(today.getDate() + 3);
+    return date;
+  }, [today]);
 
   const [departureDate, setDepartureDate] = useState<Date | null>(
     defaultDeparture,
@@ -73,28 +119,7 @@ const FlightSearchForm = () => {
     [to],
   );
 
-  const formatDay = (date: Date | null) => {
-    if (!date) return "--";
-    return date.getDate();
-  };
-
-  const formatMonthYear = (date: Date | null) => {
-    if (!date) return "Select Date";
-
-    return date.toLocaleDateString("en-US", {
-      month: "long",
-      year: "numeric",
-    });
-  };
-
-  const formatWeekday = (date: Date | null) => {
-    if (!date) return "";
-    return date.toLocaleDateString("en-US", {
-      weekday: "long",
-    });
-  };
-
-  const handleTripTypeChange = (type: TripType) => {
+  const handleTripTypeChange = (type: TripType): void => {
     setTripType(type);
 
     if (type === "oneWay") {
@@ -109,29 +134,27 @@ const FlightSearchForm = () => {
     }
   };
 
-  const handleSwap = () => {
-    if (!from || !to) return;
-
-    const temp = from;
-    setFrom(to);
-    setTo(temp);
-  };
-
-  const handleDepartureChange = (date: Date | null) => {
-    setDepartureDate(date);
-
-    if (tripType === "round" && date && returnDate && returnDate < date) {
-      const newReturn = new Date(date);
-      newReturn.setDate(date.getDate() + 3);
-      setReturnDate(newReturn);
+  const handleSwap = (): void => {
+    if (!from || !to) {
+      return;
     }
+
+    setFrom(to);
+    setTo(from);
   };
 
-  const handleReturnChange = (date: Date | null) => {
-    setReturnDate(date);
+  const handleDateChange = ({
+    departureDate: nextDepartureDate,
+    returnDate: nextReturnDate,
+  }: {
+    departureDate: Date | null;
+    returnDate: Date | null;
+  }): void => {
+    setDepartureDate(nextDepartureDate);
+    setReturnDate(nextReturnDate);
   };
 
-  const handleSearch = () => {
+  const handleSearch = (): void => {
     if (!from || !to) {
       toast.error("Please select origin and destination");
       return;
@@ -164,54 +187,16 @@ const FlightSearchForm = () => {
         infants,
       },
       cabinClass,
+      fareType,
     };
 
     onSearch(payload); */
-  };
 
-  const CounterRow = ({
-    label,
-    value,
-    setValue,
-    min = 0,
-  }: {
-    label: string;
-    value: number;
-    setValue: React.Dispatch<React.SetStateAction<number>>;
-    min?: number;
-  }) => {
-    return (
-      <div className="flex items-center justify-between py-2">
-        <span className="text-sm font-medium text-slate-700">{label}</span>
-
-        <div className="flex items-center gap-3">
-          <button
-            type="button"
-            onClick={() => setValue((prev) => Math.max(min, prev - 1))}
-            className="flex h-8 w-8 items-center justify-center rounded-md border border-slate-300 text-slate-700 transition hover:bg-slate-50"
-          >
-            -
-          </button>
-
-          <span className="w-5 text-center text-sm font-semibold text-slate-800">
-            {value}
-          </span>
-
-          <button
-            type="button"
-            onClick={() => setValue((prev) => prev + 1)}
-            className="flex h-8 w-8 items-center justify-center rounded-md border border-slate-300 text-slate-700 transition hover:bg-slate-50"
-          >
-            +
-          </button>
-        </div>
-      </div>
-    );
+    toast.success("Search payload is valid");
   };
 
   return (
     <div className="rounded-2xl bg-white p-4 sm:p-6">
-      {/* Top controls */}
       <div className="mb-5 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
         <div className="flex flex-wrap gap-2">
           <button
@@ -303,9 +288,7 @@ const FlightSearchForm = () => {
         </div>
       </div>
 
-      {/* Search row */}
-      <div className="grid grid-cols-1 gap-3 xl:grid-cols-[1.3fr_auto_1.3fr_1.2fr_1.2fr_72px]">
-        {/* From */}
+      <div className="grid grid-cols-1 gap-3 xl:grid-cols-[1.3fr_auto_1.3fr_1.5fr_72px]">
         <div className="rounded-xl border border-slate-200 bg-white px-4 py-3">
           <p className="mb-2 text-xs font-medium text-slate-500">From</p>
 
@@ -332,7 +315,6 @@ const FlightSearchForm = () => {
           </div>
         </div>
 
-        {/* Swap */}
         <div className="flex items-center justify-center">
           <button
             type="button"
@@ -343,7 +325,6 @@ const FlightSearchForm = () => {
           </button>
         </div>
 
-        {/* To */}
         <div className="rounded-xl border border-slate-200 bg-white px-4 py-3">
           <p className="mb-2 text-xs font-medium text-slate-500">To</p>
 
@@ -370,81 +351,22 @@ const FlightSearchForm = () => {
           </div>
         </div>
 
-        {/* Departure */}
-        <div className="rounded-xl border border-slate-200 bg-white px-4 py-3">
-          <p className="mb-2 text-xs font-medium text-slate-500">Departure</p>
+        <FlightDatePicker
+          tripType={tripType}
+          departureDate={departureDate}
+          returnDate={returnDate}
+          onChange={handleDateChange}
+        />
 
-          <div className="flex items-center gap-3">
-            <div className="min-w-[34px] text-2xl font-bold text-slate-800">
-              {formatDay(departureDate)}
-            </div>
-
-            <div className="min-w-0 flex-1">
-              <p className="text-lg font-bold text-slate-800">
-                {formatMonthYear(departureDate)}
-              </p>
-
-              <DatePicker
-                selected={departureDate}
-                onChange={handleDepartureChange}
-                minDate={today}
-                dateFormat="dd MMMM yyyy"
-                className="w-full bg-transparent text-sm text-slate-500 outline-none"
-              />
-
-              <p className="text-sm text-slate-500">
-                {formatWeekday(departureDate)}
-              </p>
-            </div>
-          </div>
-        </div>
-
-        {/* Return */}
-        <div className="rounded-xl border border-slate-200 bg-white px-4 py-3">
-          <p className="mb-2 text-xs font-medium text-slate-500">Return</p>
-
-          {tripType === "round" ? (
-            <div className="flex items-center gap-3">
-              <div className="min-w-[34px] text-2xl font-bold text-slate-800">
-                {formatDay(returnDate)}
-              </div>
-
-              <div className="min-w-0 flex-1">
-                <p className="text-lg font-bold text-slate-800">
-                  {formatMonthYear(returnDate)}
-                </p>
-
-                <DatePicker
-                  selected={returnDate}
-                  onChange={handleReturnChange}
-                  minDate={departureDate ?? today}
-                  dateFormat="dd MMMM yyyy"
-                  className="w-full bg-transparent text-sm text-slate-500 outline-none"
-                />
-
-                <p className="text-sm text-slate-500">
-                  {formatWeekday(returnDate)}
-                </p>
-              </div>
-            </div>
-          ) : (
-            <div className="flex h-full items-center text-sm text-slate-400">
-              Return not required
-            </div>
-          )}
-        </div>
-
-        {/* Search */}
         <button
           type="button"
           onClick={handleSearch}
-          className="flex h-full min-h-[72px] items-center justify-center rounded-xl bg-orange-500 text-white transition hover:bg-orange-600"
+          className="flex h-full min-h-18 items-center justify-center rounded-xl bg-orange-500 text-white transition hover:bg-orange-600"
         >
           <Search size={24} />
         </button>
       </div>
 
-      {/* Fare type */}
       <div className="mt-5 flex flex-wrap items-center gap-6">
         <label className="flex cursor-pointer items-center gap-2 text-sm font-medium text-slate-700">
           <input
