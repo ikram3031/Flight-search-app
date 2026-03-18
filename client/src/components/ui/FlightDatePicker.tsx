@@ -139,16 +139,17 @@ const FlightDatePicker = ({
               mode="single"
               selected={departureDate ?? undefined}
               onSelect={(date) => {
-                onChange({
-                  departureDate: date ?? null,
-                  returnDate: null,
-                });
+                date &&
+                  onChange({
+                    departureDate: date,
+                    returnDate: null,
+                  });
 
                 if (date) {
                   setOpen(false);
                 }
               }}
-              numberOfMonths={2}
+              numberOfMonths={1}
               disabled={{ before: today }}
               classNames={{
                 day: "h-10 w-10 rounded-md hover:bg-slate-200",
@@ -181,7 +182,7 @@ const FlightDatePicker = ({
                   setOpen(false);
                 }
               }}
-              numberOfMonths={2}
+              numberOfMonths={1}
               disabled={{ before: today }}
               min={2}
               classNames={{
