@@ -19,7 +19,7 @@ type Airport = {
 
 type CabinClass = "Economy" | "Business" | "First";
 
-type FareType = "regular" | "student" | "umrah";
+type FareType = "regular" | "student";
 
 /* type Props = {
   onSearch: (payload: SearchPayload) => void;
@@ -388,17 +388,6 @@ const FlightSearchForm = () => {
             className="h-4 w-4 accent-blue-600"
           />
           Student Fare
-        </label>
-
-        <label className="flex cursor-pointer items-center gap-2 text-sm font-medium text-slate-700">
-          <input
-            type="radio"
-            name="fareType"
-            checked={fareType === "umrah"}
-            onChange={() => setFareType("umrah")}
-            className="h-4 w-4 accent-blue-600"
-          />
-          Umrah Fare
         </label>
       </div>
     </div>
